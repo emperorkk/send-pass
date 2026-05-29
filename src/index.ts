@@ -29,6 +29,10 @@ function getLanguage(url: URL): LanguageCode {
   return normalizeLanguage(url.searchParams.get("lang"));
 }
 
+export function resolveRevealLanguage(url: URL, storedLanguage?: LanguageCode): LanguageCode {
+  return url.searchParams.has("lang") ? getLanguage(url) : storedLanguage ?? getLanguage(url);
+}
+
 function buildUrl(request: Request, path: string, language: LanguageCode): string {
   const url = new URL(request.url);
   url.pathname = path;
@@ -75,7 +79,7 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
   const secretMatch = url.pathname.match(/^\/s\/([^/]+)$/);
   if (request.method === "GET" && secretMatch) {
     const meta = await getSecretMeta(env, secretMatch[1]);
-    return html(revealPage(meta?.language ?? language, meta), meta ? 200 : 404);
+    return html(revealPage(resolveRevealLanguage(url, meta?.language), meta), meta ? 200 : 404);
   }
 
   const revealMatch = url.pathname.match(/^\/api\/secrets\/([^/]+)\/reveal$/);
