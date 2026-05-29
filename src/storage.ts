@@ -20,11 +20,22 @@ function keyFor(id: string): string {
   return `secret:${id}`;
 }
 
+function assertSecretsBinding(env: Env): KVNamespace {
+  if (!env.SECRETS || typeof env.SECRETS.get !== "function" || typeof env.SECRETS.put !== "function" || typeof env.SECRETS.delete !== "function") {
+    throw new ValidationError("Cloudflare KV binding SECRETS is not configured. Create a KV namespace and bind it as SECRETS.", 500);
+  }
+  return env.SECRETS;
+}
+
 function assertEncryptionKey(env: Env): string {
   if (!env.ENCRYPTION_KEY || env.ENCRYPTION_KEY.length < 16) {
-    throw new ValidationError("Server encryption key is not configured.", 500);
+    throw new ValidationError("Worker secret ENCRYPTION_KEY is not configured or is shorter than 16 characters.", 500);
   }
   return env.ENCRYPTION_KEY;
+}
+
+export function assertRequiredConfiguration(env: Env): { secrets: KVNamespace; encryptionSecret: string } {
+  return { secrets: assertSecretsBinding(env), encryptionSecret: assertEncryptionKey(env) };
 }
 
 export function parsePositiveInteger(value: unknown, fallback: number, max: number): number {
@@ -70,7 +81,7 @@ export function toPublicMeta(record: SecretRecord): PublicSecretMeta {
 }
 
 export async function createSecret(env: Env, input: CreateSecretRequest): Promise<{ id: string; deleteToken: string; meta: PublicSecretMeta }> {
-  const encryptionSecret = assertEncryptionKey(env);
+  const { secrets, encryptionSecret } = assertRequiredConfiguration(env);
   const validated = validateSecretInput(input);
   const id = randomToken(18);
   const deleteToken = randomToken(24);
@@ -88,7 +99,7 @@ export async function createSecret(env: Env, input: CreateSecretRequest): Promis
     deleteTokenHash: await sha256(deleteToken),
     version: 1
   };
-  await env.SECRETS.put(keyFor(id), JSON.stringify(record), { expirationTtl: validated.days * DAY_SECONDS });
+  await secrets.put(keyFor(id), JSON.stringify(record), { expirationTtl: validated.days * DAY_SECONDS });
   return { id, deleteToken, meta: toPublicMeta(record) };
 }
 
@@ -99,7 +110,8 @@ export async function getSecretMeta(env: Env, id: string): Promise<PublicSecretM
 }
 
 async function getRecord(env: Env, id: string): Promise<SecretRecord | null> {
-  const raw = await env.SECRETS.get(keyFor(id));
+  const secrets = assertSecretsBinding(env);
+  const raw = await secrets.get(keyFor(id));
   if (!raw) return null;
   return JSON.parse(raw) as SecretRecord;
 }
@@ -108,16 +120,16 @@ export async function revealSecret(env: Env, id: string): Promise<{ secret: stri
   const encryptionSecret = assertEncryptionKey(env);
   const record = await getRecord(env, id);
   if (!record || isExpired(record) || record.retrievals >= record.maxRetrievals) {
-    if (record && (isExpired(record) || record.retrievals >= record.maxRetrievals)) await env.SECRETS.delete(keyFor(id));
+    if (record && (isExpired(record) || record.retrievals >= record.maxRetrievals)) await assertSecretsBinding(env).delete(keyFor(id));
     return null;
   }
   const secret = await decryptText(record.ciphertext, record.iv, record.salt, encryptionSecret);
   record.retrievals += 1;
   if (record.retrievals >= record.maxRetrievals) {
-    await env.SECRETS.delete(keyFor(id));
+    await assertSecretsBinding(env).delete(keyFor(id));
   } else {
     const ttl = Math.max(Math.ceil((Date.parse(record.expiresAt) - Date.now()) / 1000), 1);
-    await env.SECRETS.put(keyFor(id), JSON.stringify(record), { expirationTtl: ttl });
+    await assertSecretsBinding(env).put(keyFor(id), JSON.stringify(record), { expirationTtl: ttl });
   }
   return { secret, meta: toPublicMeta(record) };
 }
@@ -128,6 +140,6 @@ export async function deleteSecret(env: Env, token: string): Promise<boolean> {
   const record = await getRecord(env, id);
   if (!record) return false;
   if ((await sha256(deleteToken)) !== record.deleteTokenHash) return false;
-  await env.SECRETS.delete(keyFor(id));
+  await assertSecretsBinding(env).delete(keyFor(id));
   return true;
 }

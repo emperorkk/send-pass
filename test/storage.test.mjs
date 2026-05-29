@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { DEFAULT_DAYS, DEFAULT_RETRIEVALS, MAX_DAYS, MAX_RETRIEVALS, MAX_SECRET_CHARS, parsePositiveInteger, validateSecretInput, ValidationError } from '../dist/storage.js';
+import { DEFAULT_DAYS, DEFAULT_RETRIEVALS, MAX_DAYS, MAX_RETRIEVALS, MAX_SECRET_CHARS, assertRequiredConfiguration, parsePositiveInteger, validateSecretInput, ValidationError } from '../dist/storage.js';
 import { dictionary, LANGUAGES, normalizeLanguage } from '../dist/i18n.js';
 import { resolveRevealLanguage } from '../dist/index.js';
 import { createPage, revealPage } from '../dist/html.js';
@@ -59,4 +59,17 @@ test('rendered inline scripts are valid JavaScript', () => {
     assert.ok(scripts.length > 0);
     for (const script of scripts) new Function(script);
   }
+});
+
+
+test('reports actionable configuration errors for missing Cloudflare setup', () => {
+  assert.throws(
+    () => assertRequiredConfiguration({ ENCRYPTION_KEY: 'long-enough-secret' }),
+    /Cloudflare KV binding SECRETS is not configured/
+  );
+
+  assert.throws(
+    () => assertRequiredConfiguration({ SECRETS: { get() {}, put() {}, delete() {} }, ENCRYPTION_KEY: '' }),
+    /Worker secret ENCRYPTION_KEY is not configured/
+  );
 });
