@@ -14,7 +14,20 @@ Secret Drop is a polished Cloudflare Worker web app for sharing sensitive text w
 - Localized interface for English, Greek, Polish, Icelandic, Chinese, French, Spanish, German, Hebrew, Swedish, and Serbian.
 - Generated delivery links preserve the selected language with `?lang=`.
 - Optional Cloudflare Turnstile verification when `TURNSTILE_SECRET_KEY` is configured.
-- Security headers and noindex responses.
+- Security headers plus indexable SEO, Open Graph, Twitter Card, and JSON-LD metadata.
+
+## Public search and directory launch checklist
+
+To make a deployment discoverable by Google, social preview cards, and software/tool aggregators:
+
+- Use a stable custom domain such as `secretdrop.example.com` instead of only a temporary workers.dev URL.
+- Keep the homepage indexable; this app ships index/follow robots metadata, Open Graph tags, Twitter Card tags, and JSON-LD `WebApplication` structured data.
+- Add a branded social preview image at a stable URL and update the `og:image` and `twitter:image` tags before a public launch.
+- Publish `/robots.txt` and `/sitemap.xml` routes if the site grows beyond a single-page app.
+- Submit the production URL to Google Search Console and Bing Webmaster Tools.
+- Add clear public pages for privacy, terms, abuse/contact, and security disclosures before listing on product directories.
+- List the app on relevant tool aggregators with consistent title, description, category, logo, screenshots, and canonical URL.
+- Consider moving secret delivery URLs under a noindex route policy if shared links may appear in public pages; keep only the homepage and documentation indexed.
 
 ## Cloudflare setup
 

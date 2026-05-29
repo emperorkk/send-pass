@@ -6,8 +6,32 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char] ?? char));
 }
 
+const SEO_TITLE = "Secret Drop — Secure self-destructing password links";
+const SEO_DESCRIPTION = "Secret Drop is a secure Cloudflare Worker app for sharing encrypted text and passwords with self-destructing links, expiration dates, retrieval limits, and multilingual delivery pages.";
+const SEO_KEYWORDS = "password sharing, secure secret sharing, self-destructing links, encrypted notes, one-time secret, Cloudflare Worker, password sender";
+
 function langOptions(selected: LanguageCode): string {
   return LANGUAGES.map((language) => `<option value="${language.code}" ${language.code === selected ? "selected" : ""}>${escapeHtml(language.nativeName)}</option>`).join("");
+}
+
+function structuredData(): string {
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Secret Drop",
+    applicationCategory: "SecurityApplication",
+    operatingSystem: "Any",
+    description: SEO_DESCRIPTION,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    featureList: [
+      "Encrypted secret sharing",
+      "Self-destructing links",
+      "Configurable expiration",
+      "Configurable retrieval limits",
+      "Multilingual interface",
+      "Cloudflare Turnstile support"
+    ]
+  }).replace(/</g, "\\u003c");
 }
 
 function shell(language: LanguageCode, body: string, options: { turnstileSiteKey?: string; meta?: PublicSecretMeta | null; page?: string } = {}): string {
@@ -19,8 +43,33 @@ function shell(language: LanguageCode, body: string, options: { turnstileSiteKey
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${escapeHtml(strings.appName)}</title>
-  <meta name="robots" content="noindex,nofollow">
+  <title>${escapeHtml(SEO_TITLE)}</title>
+  <meta name="description" content="${escapeHtml(SEO_DESCRIPTION)}">
+  <meta name="keywords" content="${escapeHtml(SEO_KEYWORDS)}">
+  <meta name="author" content="Secret Drop">
+  <meta name="application-name" content="Secret Drop">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <link rel="canonical" href="/">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Secret Drop">
+  <meta property="og:title" content="${escapeHtml(SEO_TITLE)}">
+  <meta property="og:description" content="${escapeHtml(SEO_DESCRIPTION)}">
+  <meta property="og:url" content="/">
+  <meta property="og:locale" content="${language}">
+  <meta property="og:image" content="/social-card.svg">
+  <meta property="og:image:type" content="image/svg+xml">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Secret Drop secure self-destructing password links">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${escapeHtml(SEO_TITLE)}">
+  <meta name="twitter:description" content="${escapeHtml(SEO_DESCRIPTION)}">
+  <meta name="twitter:image" content="/social-card.svg">
+  <meta name="twitter:image:alt" content="Secret Drop secure self-destructing password links">
+  <meta name="theme-color" content="#7c5cff">
+  <script type="application/ld+json">${structuredData()}</script>
   <style>${styles()}</style>
   ${options.turnstileSiteKey ? `<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>` : ""}
 </head>
@@ -83,7 +132,7 @@ function unavailable(language: LanguageCode): string {
 }
 
 function styles(): string {
-  return `:root{color-scheme:dark;--bg:#0b1020;--card:#121a30;--card2:#17223d;--text:#f5f7fb;--muted:#a9b4cc;--accent:#7c5cff;--accent2:#26d0ce;--danger:#ff6b6b;--ring:rgba(124,92,255,.35)}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 10% 10%,rgba(124,92,255,.35),transparent 30%),radial-gradient(circle at 90% 0,rgba(38,208,206,.22),transparent 28%),var(--bg);color:var(--text)}.page{width:min(980px,92vw);margin:0 auto;padding:48px 0}.hero{display:grid;gap:18px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#dfe6ff}.logo{display:grid;place-items:center;width:38px;height:38px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 14px 40px rgba(124,92,255,.35)}h1{font-size:clamp(2.1rem,6vw,4.8rem);line-height:1;margin:0;max-width:850px}h2{font-size:clamp(1.45rem,3vw,2rem);margin:0 0 10px}.language{justify-self:end;display:flex;gap:10px;align-items:center;color:var(--muted)}select,input,textarea{width:100%;border:1px solid rgba(255,255,255,.13);border-radius:16px;background:#0f1629;color:var(--text);padding:13px 14px;font:inherit;outline:none}select:focus,input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--ring)}textarea{min-height:190px;resize:vertical;line-height:1.5}.card{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.12);border-radius:28px;padding:28px;box-shadow:0 24px 80px rgba(0,0,0,.28);backdrop-filter:blur(16px)}.form{display:grid;gap:18px;margin-top:24px}label{display:grid;gap:8px;font-weight:700}.muted,.privacy,.charline{color:var(--muted)}.privacy{font-size:.95rem}.grid.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.primary,.secondary{border:0;border-radius:16px;padding:14px 18px;font-weight:800;font:inherit;cursor:pointer;text-decoration:none;text-align:center}.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;box-shadow:0 14px 35px rgba(124,92,255,.28)}.secondary{display:inline-block;background:rgba(255,255,255,.09);color:var(--text);border:1px solid rgba(255,255,255,.12)}.primary:disabled{opacity:.6;cursor:wait}.result{margin-top:22px}.hidden{display:none!important}.linkbox{display:grid;grid-template-columns:1fr auto;gap:10px;margin:12px 0 18px}.linkbox input{font-size:.92rem}.stats{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}.stats span{padding:10px 12px;border-radius:999px;background:rgba(255,255,255,.08);color:#d9e2fb}.secret-output{white-space:pre-wrap;word-break:break-word;background:#090d19;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:18px;margin-top:20px;color:#f7fbff}.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);padding:12px 16px;border-radius:999px;background:#eef3ff;color:#111827;font-weight:800;box-shadow:0 16px 45px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1}@media(max-width:680px){.page{padding:28px 0}.language{justify-self:stretch}.grid.two,.linkbox{grid-template-columns:1fr}.card{padding:22px}h1{font-size:2.45rem}}`;
+  return `:root{color-scheme:dark;--bg:#0b1020;--card:#121a30;--card2:#17223d;--text:#f5f7fb;--muted:#a9b4cc;--accent:#7c5cff;--accent2:#26d0ce;--danger:#ff6b6b;--ring:rgba(124,92,255,.35)}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at 10% 10%,rgba(124,92,255,.35),transparent 30%),radial-gradient(circle at 90% 0,rgba(38,208,206,.22),transparent 28%),var(--bg);color:var(--text)}.page{width:min(980px,92vw);margin:0 auto;padding:48px 0}.hero{display:grid;gap:18px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#dfe6ff}.logo{display:grid;place-items:center;width:38px;height:38px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 14px 40px rgba(124,92,255,.35)}h1{font-size:clamp(1.65rem,4vw,3rem);line-height:1.08;margin:0;max-width:760px}h2{font-size:clamp(1.45rem,3vw,2rem);margin:0 0 10px}.language{justify-self:end;display:flex;gap:10px;align-items:center;color:var(--muted)}select,input,textarea{width:100%;border:1px solid rgba(255,255,255,.13);border-radius:16px;background:#0f1629;color:var(--text);padding:13px 14px;font:inherit;outline:none}select:focus,input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--ring)}textarea{min-height:190px;resize:vertical;line-height:1.5}.card{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.12);border-radius:28px;padding:28px;box-shadow:0 24px 80px rgba(0,0,0,.28);backdrop-filter:blur(16px)}.form{display:grid;gap:18px;margin-top:24px}label{display:grid;gap:8px;font-weight:700}.muted,.privacy,.charline{color:var(--muted)}.privacy{font-size:.95rem}.grid.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.primary,.secondary{border:0;border-radius:16px;padding:14px 18px;font-weight:800;font:inherit;cursor:pointer;text-decoration:none;text-align:center}.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;box-shadow:0 14px 35px rgba(124,92,255,.28)}.secondary{display:inline-block;background:rgba(255,255,255,.09);color:var(--text);border:1px solid rgba(255,255,255,.12)}.primary:disabled{opacity:.6;cursor:wait}.result{margin-top:22px}.hidden{display:none!important}.linkbox{display:grid;grid-template-columns:1fr auto;gap:10px;margin:12px 0 18px}.linkbox input{font-size:.92rem}.stats{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}.stats span{padding:10px 12px;border-radius:999px;background:rgba(255,255,255,.08);color:#d9e2fb}.secret-output{white-space:pre-wrap;word-break:break-word;background:#090d19;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:18px;margin-top:20px;color:#f7fbff}.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);padding:12px 16px;border-radius:999px;background:#eef3ff;color:#111827;font-weight:800;box-shadow:0 16px 45px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1}@media(max-width:680px){.page{padding:28px 0}.language{justify-self:stretch}.grid.two,.linkbox{grid-template-columns:1fr}.card{padding:22px}h1{font-size:2rem}}`;
 }
 
 function clientScript(): string {
@@ -110,14 +159,17 @@ $('#createForm')?.addEventListener('submit', async (event) => {
     const data = await response.json();
     if (!response.ok) throw new Error(data.details ? data.error + ': ' + data.details : data.error || state.strings.errorGeneric);
     const result = $('#result');
-    result.innerHTML = '<h2>'+state.strings.linkReady+'</h2>'+linkRow(state.strings.shareLink, data.shareUrl)+linkRow(state.strings.deleteLink, data.deleteUrl)+'<a class="secondary" href="/?lang='+state.language+'">'+state.strings.createAnother+'</a>';
+    result.innerHTML = '<h2>'+state.strings.linkReady+'</h2>'+linkRow(state.strings.shareLink, data.shareUrl, true)+linkRow(state.strings.deleteLink, data.deleteUrl, false)+'<a class="secondary" href="/?lang='+state.language+'">'+state.strings.createAnother+'</a>';
     result.classList.remove('hidden');
+    const shareInput = result.querySelector('[data-share-link]');
+    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (shareInput) { shareInput.focus(); shareInput.select(); }
     form.reset(); $('#charCount').textContent = '0';
     if (window.turnstile) window.turnstile.reset();
   } catch (error) { toast(error.message || state.strings.errorGeneric); }
   finally { button.disabled = false; }
 });
-function linkRow(label, value){ const safeValue = escapeAttr(value); return '<label>'+label+'<div class="linkbox"><input readonly value="'+safeValue+'"><button class="secondary" type="button" data-copy="'+safeValue+'">'+state.strings.copy+'</button></div></label>'; }
+function linkRow(label, value, isShare){ const safeValue = escapeAttr(value); return '<label>'+label+'<div class="linkbox"><input readonly '+(isShare ? 'data-share-link="true" ' : '')+'value="'+safeValue+'"><button class="secondary" type="button" data-copy="'+safeValue+'">'+state.strings.copy+'</button></div></label>'; }
 function escapeAttr(value){ return value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;'); }
 $('#revealButton')?.addEventListener('click', async (event) => {
   const button = event.currentTarget;

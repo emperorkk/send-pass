@@ -116,3 +116,37 @@ test('PBKDF2 settings stay within Cloudflare Workers runtime limits', async () =
   const encrypted = await encryptText('cloudflare-compatible secret', 'this-is-at-least-sixteen-characters');
   assert.equal(await decryptText(encrypted.ciphertext, encrypted.iv, encrypted.salt, 'this-is-at-least-sixteen-characters'), 'cloudflare-compatible secret');
 });
+
+test('create page includes indexable SEO and social metadata', () => {
+  const html = createPage('en', 'site-key');
+  assert.match(html, /<meta name="description" content="Secret Drop is a secure Cloudflare Worker app/);
+  assert.match(html, /<meta name="robots" content="index,follow/);
+  assert.match(html, /<meta property="og:title" content="Secret Drop/);
+  assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
+  assert.match(html, /<meta property="og:image" content="\/social-card.svg">/);
+  assert.match(html, /<link rel="manifest" href="\/site.webmanifest">/);
+  assert.match(html, /<script type="application\/ld\+json">/);
+  assert.doesNotMatch(html, /noindex/);
+});
+
+test('create result script focuses generated share link', () => {
+  const html = createPage('en', 'site-key');
+  assert.match(html, /data-share-link/);
+  assert.match(html, /shareInput\.focus\(\)/);
+  assert.match(html, /shareInput\.select\(\)/);
+});
+
+test('public discovery endpoints are available for crawlers and aggregators', async () => {
+  const worker = (await import('../dist/index.js')).default;
+  const robots = await worker.fetch(new Request('https://example.com/robots.txt'), {});
+  assert.equal(robots.status, 200);
+  assert.match(await robots.text(), /Sitemap: https:\/\/example\.com\/sitemap\.xml/);
+
+  const sitemap = await worker.fetch(new Request('https://example.com/sitemap.xml'), {});
+  assert.equal(sitemap.status, 200);
+  assert.match(await sitemap.text(), /<loc>https:\/\/example\.com\/<\/loc>/);
+
+  const card = await worker.fetch(new Request('https://example.com/social-card.svg'), {});
+  assert.equal(card.status, 200);
+  assert.match(await card.text(), /Secret Drop/);
+});

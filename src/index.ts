@@ -7,8 +7,7 @@ const SECURITY_HEADERS = {
   "content-security-policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'unsafe-inline'; frame-src https://challenges.cloudflare.com; connect-src 'self'; base-uri 'none'; form-action 'self'; object-src 'none'",
   "x-content-type-options": "nosniff",
   "referrer-policy": "no-referrer",
-  "permissions-policy": "camera=(), microphone=(), geolocation=()",
-  "x-robots-tag": "noindex, nofollow"
+  "permissions-policy": "camera=(), microphone=(), geolocation=()"
 };
 
 function withHeaders(response: Response): Response {
@@ -23,6 +22,10 @@ function html(body: string, status = 200): Response {
 
 function json(body: unknown, status = 200): Response {
   return withHeaders(new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json; charset=utf-8" } }));
+}
+
+function text(body: string, contentType: string, status = 200): Response {
+  return withHeaders(new Response(body, { status, headers: { "content-type": contentType } }));
 }
 
 function errorDetails(error: unknown): string {
@@ -40,6 +43,30 @@ function getLanguage(url: URL): LanguageCode {
 
 export function resolveRevealLanguage(url: URL, storedLanguage?: LanguageCode): LanguageCode {
   return url.searchParams.has("lang") ? getLanguage(url) : storedLanguage ?? getLanguage(url);
+}
+
+function publicUrl(request: Request, path: string): string {
+  const url = new URL(request.url);
+  url.pathname = path;
+  url.search = "";
+  return url.toString();
+}
+
+function robotsTxt(request: Request): Response {
+  return text(`User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: ${publicUrl(request, "/sitemap.xml")}\n`, "text/plain; charset=utf-8");
+}
+
+function sitemapXml(request: Request): Response {
+  const updated = new Date().toISOString();
+  return text(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url>\n    <loc>${publicUrl(request, "/")}</loc>\n    <lastmod>${updated}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>\n</urlset>\n`, "application/xml; charset=utf-8");
+}
+
+function siteManifest(): Response {
+  return json({ name: "Secret Drop", short_name: "Secret Drop", description: "Secure self-destructing password links", start_url: "/", display: "standalone", background_color: "#0b1020", theme_color: "#7c5cff", categories: ["security", "productivity", "utilities"] });
+}
+
+function socialCard(): Response {
+  return text(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Secret Drop secure self-destructing password links"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b1020"/><stop offset="0.55" stop-color="#17223d"/><stop offset="1" stop-color="#7c5cff"/></linearGradient></defs><rect width="1200" height="630" fill="url(#bg)"/><circle cx="1040" cy="80" r="210" fill="#26d0ce" opacity="0.28"/><circle cx="120" cy="520" r="260" fill="#7c5cff" opacity="0.26"/><text x="90" y="210" fill="#f5f7fb" font-family="Inter,Arial,sans-serif" font-size="86" font-weight="800">Secret Drop</text><text x="90" y="305" fill="#dfe6ff" font-family="Inter,Arial,sans-serif" font-size="42" font-weight="700">Secure self-destructing password links</text><text x="90" y="380" fill="#a9b4cc" font-family="Inter,Arial,sans-serif" font-size="30">Encrypted sharing • Expiring links • Retrieval limits</text><rect x="90" y="450" width="360" height="74" rx="24" fill="#ffffff" opacity="0.12"/><text x="125" y="498" fill="#ffffff" font-family="Inter,Arial,sans-serif" font-size="28" font-weight="700">No account required</text></svg>`, "image/svg+xml; charset=utf-8");
 }
 
 function buildUrl(request: Request, path: string, language: LanguageCode): string {
@@ -90,6 +117,10 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
       return internalError(error);
     }
   }
+  if (request.method === "GET" && url.pathname === "/robots.txt") return robotsTxt(request);
+  if (request.method === "GET" && url.pathname === "/sitemap.xml") return sitemapXml(request);
+  if (request.method === "GET" && url.pathname === "/site.webmanifest") return siteManifest();
+  if (request.method === "GET" && url.pathname === "/social-card.svg") return socialCard();
   if (request.method === "GET" && url.pathname === "/") return html(createPage(language, env.TURNSTILE_SITE_KEY));
   if (request.method === "POST" && url.pathname === "/api/secrets") return handleCreate(request, env);
 
