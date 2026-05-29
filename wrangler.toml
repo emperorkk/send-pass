@@ -1,4 +1,4 @@
-name = "secret-drop"
+name = "send-pass"
 main = "src/index.ts"
 compatibility_date = "2026-05-29"
 
@@ -8,9 +8,9 @@ compatibility_date = "2026-05-29"
 #   wrangler kv namespace create SECRETS --preview
 [[kv_namespaces]]
 binding = "SECRETS"
-id = "REPLACE_WITH_PRODUCTION_KV_NAMESPACE_ID"
-preview_id = "REPLACE_WITH_PREVIEW_KV_NAMESPACE_ID"
+id = "86ace31dd2e84d6a8d7ff4e19d77020f"
+preview_id = "86ace31dd2e84d6a8d7ff4e19d77020f"
 
 [vars]
 # Optional. When set with TURNSTILE_SECRET_KEY, the create form requires Cloudflare Turnstile.
-TURNSTILE_SITE_KEY = ""
+TURNSTILE_SITE_KEY = "0x4AAAAAADYoL2EdBTDCaMi8"
