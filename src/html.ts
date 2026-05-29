@@ -91,12 +91,14 @@ function clientScript(): string {
 const state = window.SECRET_DROP;
 const $ = (selector) => document.querySelector(selector);
 const toast = (message) => { const el = $('#toast'); el.textContent = message; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1700); };
-const withLang = (url) => { const next = new URL(url, location.origin); next.searchParams.set('lang', $('#languageSelect').value); return next.toString(); };
 $('#languageSelect')?.addEventListener('change', (event) => { const url = new URL(location.href); url.searchParams.set('lang', event.target.value); location.href = url.toString(); });
 const secret = $('#secret');
 secret?.addEventListener('input', () => { $('#charCount').textContent = String(secret.value.length); });
 async function copy(value){ await navigator.clipboard.writeText(value); toast(state.strings.copied); }
-window.copySecretDrop = copy;
+document.addEventListener('click', (event) => {
+  const target = event.target instanceof Element ? event.target.closest('[data-copy]') : null;
+  if (target instanceof HTMLElement) copy(target.dataset.copy || '');
+});
 $('#createForm')?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
@@ -115,9 +117,8 @@ $('#createForm')?.addEventListener('submit', async (event) => {
   } catch (error) { toast(error.message || state.strings.errorGeneric); }
   finally { button.disabled = false; }
 });
-function linkRow(label, value){ return '<label>'+label+'<div class="linkbox"><input readonly value="'+escapeAttr(value)+'"><button class="secondary" type="button" onclick="copySecretDrop(\''+escapeJs(value)+'\')">'+state.strings.copy+'</button></div></label>'; }
+function linkRow(label, value){ const safeValue = escapeAttr(value); return '<label>'+label+'<div class="linkbox"><input readonly value="'+safeValue+'"><button class="secondary" type="button" data-copy="'+safeValue+'">'+state.strings.copy+'</button></div></label>'; }
 function escapeAttr(value){ return value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;'); }
-function escapeJs(value){ return value.replaceAll('\\','\\\\').replaceAll("'","\\'"); }
 $('#revealButton')?.addEventListener('click', async (event) => {
   const button = event.currentTarget;
   button.disabled = true;
