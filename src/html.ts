@@ -108,7 +108,7 @@ $('#createForm')?.addEventListener('submit', async (event) => {
     const turnstileToken = window.turnstile ? window.turnstile.getResponse() : '';
     const response = await fetch('/api/secrets', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ secret: form.secret.value, days: form.days.value, retrievals: form.retrievals.value, language: $('#languageSelect').value, turnstileToken }) });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || state.strings.errorGeneric);
+    if (!response.ok) throw new Error(data.details ? data.error + ': ' + data.details : data.error || state.strings.errorGeneric);
     const result = $('#result');
     result.innerHTML = '<h2>'+state.strings.linkReady+'</h2>'+linkRow(state.strings.shareLink, data.shareUrl)+linkRow(state.strings.deleteLink, data.deleteUrl)+'<a class="secondary" href="/?lang='+state.language+'">'+state.strings.createAnother+'</a>';
     result.classList.remove('hidden');
@@ -126,7 +126,7 @@ $('#revealButton')?.addEventListener('click', async (event) => {
     const id = location.pathname.split('/').pop();
     const response = await fetch('/api/secrets/'+encodeURIComponent(id)+'/reveal', { method: 'POST' });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || state.strings.errorGeneric);
+    if (!response.ok) throw new Error(data.details ? data.error + ': ' + data.details : data.error || state.strings.errorGeneric);
     $('#secretOutput').textContent = data.secret;
     $('#secretOutput').classList.remove('hidden');
     button.textContent = state.strings.revealedTitle;

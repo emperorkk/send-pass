@@ -73,3 +73,38 @@ test('reports actionable configuration errors for missing Cloudflare setup', () 
     /Worker secret ENCRYPTION_KEY is not configured/
   );
 });
+
+test('worker responses expose actionable create-secret failure details', async () => {
+  const worker = (await import('../dist/index.js')).default;
+  const request = new Request('https://example.com/api/secrets', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ secret: 'hello' })
+  });
+
+  const missingConfigResponse = await worker.fetch(request.clone(), {});
+  assert.equal(missingConfigResponse.status, 500);
+  assert.match((await missingConfigResponse.json()).error, /Cloudflare KV binding SECRETS/);
+
+  const kvFailureResponse = await worker.fetch(request.clone(), {
+    ENCRYPTION_KEY: 'this-is-at-least-sixteen-characters',
+    SECRETS: {
+      async get() { return null; },
+      async put() { throw new Error('simulated KV write failure'); },
+      async delete() {}
+    }
+  });
+  assert.equal(kvFailureResponse.status, 500);
+  const body = await kvFailureResponse.json();
+  assert.equal(body.error, 'Server error while processing the request.');
+  assert.match(body.details, /simulated KV write failure/);
+});
+
+test('health reports missing configuration details', async () => {
+  const worker = (await import('../dist/index.js')).default;
+  const response = await worker.fetch(new Request('https://example.com/health'), {});
+  assert.equal(response.status, 500);
+  const body = await response.json();
+  assert.equal(body.ok, false);
+  assert.match(body.error, /Cloudflare KV binding SECRETS/);
+});

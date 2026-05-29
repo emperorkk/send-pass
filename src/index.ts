@@ -1,6 +1,6 @@
 import { createPage, deletedPage, revealPage } from "./html.js";
 import { normalizeLanguage } from "./i18n.js";
-import { createSecret, deleteSecret, getSecretMeta, revealSecret, ValidationError } from "./storage.js";
+import { assertRequiredConfiguration, createSecret, deleteSecret, getSecretMeta, revealSecret, ValidationError } from "./storage.js";
 import type { CreateSecretRequest, Env, LanguageCode } from "./types.js";
 
 const SECURITY_HEADERS = {
@@ -23,6 +23,15 @@ function html(body: string, status = 200): Response {
 
 function json(body: unknown, status = 200): Response {
   return withHeaders(new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json; charset=utf-8" } }));
+}
+
+function errorDetails(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function internalError(error: unknown): Response {
+  console.error("Secret Drop Worker error", error);
+  return json({ error: "Server error while processing the request.", details: errorDetails(error) }, 500);
 }
 
 function getLanguage(url: URL): LanguageCode {
@@ -72,7 +81,15 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
   const language = getLanguage(url);
 
-  if (request.method === "GET" && url.pathname === "/health") return json({ ok: true });
+  if (request.method === "GET" && url.pathname === "/health") {
+    try {
+      assertRequiredConfiguration(env);
+      return json({ ok: true, configuration: { secretsBinding: true, encryptionKey: true, turnstile: Boolean(env.TURNSTILE_SECRET_KEY) } });
+    } catch (error) {
+      if (error instanceof ValidationError) return json({ ok: false, error: error.message }, error.status);
+      return internalError(error);
+    }
+  }
   if (request.method === "GET" && url.pathname === "/") return html(createPage(language, env.TURNSTILE_SITE_KEY));
   if (request.method === "POST" && url.pathname === "/api/secrets") return handleCreate(request, env);
 
@@ -104,7 +121,7 @@ export default {
       return await handleRequest(request, env);
     } catch (error) {
       if (error instanceof ValidationError) return json({ error: error.message }, error.status);
-      return json({ error: "Internal server error." }, 500);
+      return internalError(error);
     }
   }
 };
