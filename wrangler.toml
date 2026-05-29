@@ -1,4 +1,4 @@
-name = "secret-drop"
+name = "send-pass"
 main = "src/index.ts"
 compatibility_date = "2026-05-29"
 
