@@ -121,6 +121,7 @@ test('create page includes indexable SEO and social metadata', () => {
   const html = createPage('en', 'site-key');
   assert.match(html, /<meta name="description" content="Secret Drop is a secure Cloudflare Worker app/);
   assert.match(html, /<meta name="robots" content="index,follow/);
+  assert.match(html, /<meta name="google-site-verification" content="NNRy9Ofxuk0vKhpm_47Dd4mZwH8sVVYxlKIuyrm7WZA">/);
   assert.match(html, /<meta property="og:title" content="Secret Drop/);
   assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
   assert.match(html, /<meta property="og:image" content="\/social-card.svg">/);

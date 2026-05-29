@@ -48,6 +48,7 @@ function shell(language: LanguageCode, body: string, options: { turnstileSiteKey
   <meta name="keywords" content="${escapeHtml(SEO_KEYWORDS)}">
   <meta name="author" content="Secret Drop">
   <meta name="application-name" content="Secret Drop">
+  <meta name="google-site-verification" content="NNRy9Ofxuk0vKhpm_47Dd4mZwH8sVVYxlKIuyrm7WZA">
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
   <link rel="canonical" href="/">
