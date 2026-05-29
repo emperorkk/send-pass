@@ -4,6 +4,7 @@ import { DEFAULT_DAYS, DEFAULT_RETRIEVALS, MAX_DAYS, MAX_RETRIEVALS, MAX_SECRET_
 import { dictionary, LANGUAGES, normalizeLanguage } from '../dist/i18n.js';
 import { resolveRevealLanguage } from '../dist/index.js';
 import { createPage, revealPage } from '../dist/html.js';
+import { decryptText, encryptText, PBKDF2_ITERATIONS } from '../dist/crypto.js';
 
 test('uses defaults and normalizes language', () => {
   assert.deepEqual(validateSecretInput({ secret: 'hello' }), {
@@ -107,4 +108,11 @@ test('health reports missing configuration details', async () => {
   const body = await response.json();
   assert.equal(body.ok, false);
   assert.match(body.error, /Cloudflare KV binding SECRETS/);
+});
+
+
+test('PBKDF2 settings stay within Cloudflare Workers runtime limits', async () => {
+  assert.equal(PBKDF2_ITERATIONS, 100_000);
+  const encrypted = await encryptText('cloudflare-compatible secret', 'this-is-at-least-sixteen-characters');
+  assert.equal(await decryptText(encrypted.ciphertext, encrypted.iv, encrypted.salt, 'this-is-at-least-sixteen-characters'), 'cloudflare-compatible secret');
 });

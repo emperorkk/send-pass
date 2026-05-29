@@ -1,6 +1,9 @@
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
+// Cloudflare Workers currently reject PBKDF2 iteration counts above 100,000.
+export const PBKDF2_ITERATIONS = 100_000;
+
 function toBase64(bytes: Uint8Array): string {
   let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);
@@ -23,7 +26,7 @@ export function randomToken(bytes = 24): string {
 async function deriveKey(secret: string, salt: Uint8Array<ArrayBuffer>, usages: KeyUsage[]): Promise<CryptoKey> {
   const baseKey = await crypto.subtle.importKey("raw", encoder.encode(secret) as Uint8Array<ArrayBuffer>, "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations: 150_000, hash: "SHA-256" },
+    { name: "PBKDF2", salt, iterations: PBKDF2_ITERATIONS, hash: "SHA-256" },
     baseKey,
     { name: "AES-GCM", length: 256 },
     false,
