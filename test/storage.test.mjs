@@ -122,6 +122,7 @@ test('create page includes indexable SEO and social metadata', () => {
   assert.match(html, /<meta name="description" content="Secret Drop is a secure Cloudflare Worker app/);
   assert.match(html, /<meta name="robots" content="index,follow/);
   assert.match(html, /<meta name="google-site-verification" content="NNRy9Ofxuk0vKhpm_47Dd4mZwH8sVVYxlKIuyrm7WZA">/);
+  assert.match(html, /<meta name="msvalidate\.01" content="094606C9E2B8B0AFD7ECF9EDD083FCE7">/);
   assert.match(html, /<meta property="og:title" content="Secret Drop/);
   assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
   assert.match(html, /<meta property="og:image" content="\/social-card.svg">/);
@@ -150,4 +151,14 @@ test('public discovery endpoints are available for crawlers and aggregators', as
   const card = await worker.fetch(new Request('https://example.com/social-card.svg'), {});
   assert.equal(card.status, 200);
   assert.match(await card.text(), /Secret Drop/);
+});
+
+
+test('page footer includes indemnification, security process, and creator link', () => {
+  const html = createPage('en', 'site-key');
+  assert.match(html, /Security process/);
+  assert.match(html, /AES-GCM/);
+  assert.match(html, /Indemnification/);
+  assert.match(html, /indemnify and hold the creator and operators harmless/);
+  assert.match(html, /https:\/\/kourentzes\.com\/konstantinos/);
 });
