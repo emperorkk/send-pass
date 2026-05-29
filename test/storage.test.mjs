@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { DEFAULT_DAYS, DEFAULT_RETRIEVALS, MAX_DAYS, MAX_RETRIEVALS, MAX_SECRET_CHARS, parsePositiveInteger, validateSecretInput, ValidationError } from '../dist/storage.js';
+import { dictionary, LANGUAGES, normalizeLanguage } from '../dist/i18n.js';
 
 test('uses defaults and normalizes language', () => {
   assert.deepEqual(validateSecretInput({ secret: 'hello' }), {
@@ -30,4 +31,14 @@ test('parses positive integers with fallback', () => {
   assert.equal(parsePositiveInteger('not-a-number', 3, 10), 3);
   assert.equal(parsePositiveInteger('-2', 3, 10), 1);
   assert.equal(parsePositiveInteger('100', 3, 10), 10);
+});
+
+
+test('supports all configured interface languages', () => {
+  const codes = LANGUAGES.map((language) => language.code);
+  assert.deepEqual(codes, ['en', 'gr', 'pl', 'is', 'cn', 'fr', 'es', 'de', 'he', 'sv', 'sr']);
+  for (const code of codes) {
+    assert.ok(dictionary[code], `missing dictionary for ${code}`);
+    assert.equal(normalizeLanguage(code.toUpperCase()), code);
+  }
 });

@@ -11,7 +11,7 @@ Secret Drop is a polished Cloudflare Worker web app for sharing sensitive text w
 - Default retrieval limit of 10, configurable up to 99 retrievals.
 - Reveal button so previews and accidental page loads do not consume a retrieval.
 - Sender delete/revoke link.
-- Localized interface for English, Greek, Polish, Icelandic, Chinese, French, and Spanish.
+- Localized interface for English, Greek, Polish, Icelandic, Chinese, French, Spanish, German, Hebrew, Swedish, and Serbian.
 - Generated delivery links preserve the selected language with `?lang=`.
 - Optional Cloudflare Turnstile verification when `TURNSTILE_SECRET_KEY` is configured.
 - Security headers and noindex responses.

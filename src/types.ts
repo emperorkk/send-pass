@@ -1,4 +1,4 @@
-export type LanguageCode = "en" | "gr" | "pl" | "is" | "cn" | "fr" | "es";
+export type LanguageCode = "en" | "gr" | "pl" | "is" | "cn" | "fr" | "es" | "de" | "he" | "sv" | "sr";
 
 export interface Env {
   SECRETS: KVNamespace;

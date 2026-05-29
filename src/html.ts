@@ -13,8 +13,9 @@ function langOptions(selected: LanguageCode): string {
 function shell(language: LanguageCode, body: string, options: { turnstileSiteKey?: string; meta?: PublicSecretMeta | null; page?: string } = {}): string {
   const strings = t(language);
   const state = JSON.stringify({ language, strings, maxChars: MAX_SECRET_CHARS, turnstileSiteKey: options.turnstileSiteKey || "", meta: options.meta ?? null, page: options.page ?? "create" }).replace(/</g, "\\u003c");
+  const direction = language === "he" ? "rtl" : "ltr";
   return `<!doctype html>
-<html lang="${language}">
+<html lang="${language}" dir="${direction}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
