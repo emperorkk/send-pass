@@ -38,6 +38,8 @@ function shell(language: LanguageCode, body: string, options: { turnstileSiteKey
   const strings = t(language);
   const state = JSON.stringify({ language, strings, maxChars: MAX_SECRET_CHARS, turnstileSiteKey: options.turnstileSiteKey || "", meta: options.meta ?? null, page: options.page ?? "create" }).replace(/</g, "\\u003c");
   const direction = language === "he" ? "rtl" : "ltr";
+  const indexable = options.page === "create";
+  const robots = indexable ? "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" : "noindex,nofollow,noarchive";
   return `<!doctype html>
 <html lang="${language}" dir="${direction}">
 <head>
@@ -50,8 +52,8 @@ function shell(language: LanguageCode, body: string, options: { turnstileSiteKey
   <meta name="application-name" content="Secret Drop">
   <meta name="google-site-verification" content="NNRy9Ofxuk0vKhpm_47Dd4mZwH8sVVYxlKIuyrm7WZA">
   <meta name="msvalidate.01" content="094606C9E2B8B0AFD7ECF9EDD083FCE7">
-  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
-  <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <meta name="robots" content="${robots}">
+  <meta name="googlebot" content="${robots}">
   <link rel="canonical" href="/">
   <link rel="manifest" href="/site.webmanifest">
   <meta property="og:type" content="website">

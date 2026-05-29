@@ -53,7 +53,7 @@ function publicUrl(request: Request, path: string): string {
 }
 
 function robotsTxt(request: Request): Response {
-  return text(`User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: ${publicUrl(request, "/sitemap.xml")}\n`, "text/plain; charset=utf-8");
+  return text(`User-agent: *\nAllow: /$\nDisallow: /\nSitemap: ${publicUrl(request, "/sitemap.xml")}\n`, "text/plain; charset=utf-8");
 }
 
 function sitemapXml(request: Request): Response {

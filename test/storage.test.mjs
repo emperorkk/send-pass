@@ -142,7 +142,10 @@ test('public discovery endpoints are available for crawlers and aggregators', as
   const worker = (await import('../dist/index.js')).default;
   const robots = await worker.fetch(new Request('https://example.com/robots.txt'), {});
   assert.equal(robots.status, 200);
-  assert.match(await robots.text(), /Sitemap: https:\/\/example\.com\/sitemap\.xml/);
+  const robotsBody = await robots.text();
+  assert.match(robotsBody, /Allow: \/\$/);
+  assert.match(robotsBody, /Disallow: \//);
+  assert.match(robotsBody, /Sitemap: https:\/\/example\.com\/sitemap\.xml/);
 
   const sitemap = await worker.fetch(new Request('https://example.com/sitemap.xml'), {});
   assert.equal(sitemap.status, 200);
@@ -161,4 +164,18 @@ test('page footer includes indemnification, security process, and creator link',
   assert.match(html, /Indemnification/);
   assert.match(html, /indemnify and hold the creator and operators harmless/);
   assert.match(html, /https:\/\/kourentzes\.com\/konstantinos/);
+});
+
+
+test('secret and delete pages are noindex even though homepage is indexable', () => {
+  const revealHtml = revealPage('en', {
+    id: 'secret-id',
+    expiresAt: new Date(Date.now() + 60_000).toISOString(),
+    maxRetrievals: 1,
+    retrievals: 0,
+    remainingRetrievals: 1,
+    language: 'en'
+  });
+  assert.match(revealHtml, /<meta name="robots" content="noindex,nofollow,noarchive">/);
+  assert.match(revealHtml, /<meta name="googlebot" content="noindex,nofollow,noarchive">/);
 });

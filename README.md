@@ -21,13 +21,13 @@ Secret Drop is a polished Cloudflare Worker web app for sharing sensitive text w
 To make a deployment discoverable by Google, social preview cards, and software/tool aggregators:
 
 - Use a stable custom domain such as `secretdrop.example.com` instead of only a temporary workers.dev URL.
-- Keep the homepage indexable; this app ships index/follow robots metadata, Open Graph tags, Twitter Card tags, and JSON-LD `WebApplication` structured data.
+- Keep only the homepage indexable; this app ships `/robots.txt` with `Allow: /$` and `Disallow: /`, homepage index/follow metadata, and noindex metadata on generated secret/delete pages.
 - Add a branded social preview image at a stable URL and update the `og:image` and `twitter:image` tags before a public launch.
-- Publish `/robots.txt` and `/sitemap.xml` routes if the site grows beyond a single-page app.
+- Publish `/robots.txt` and `/sitemap.xml`; this app includes both and lists only the homepage in the sitemap.
 - Submit the production URL to Google Search Console and Bing Webmaster Tools.
 - Add clear public pages for privacy, terms, abuse/contact, and security disclosures before listing on product directories.
 - List the app on relevant tool aggregators with consistent title, description, category, logo, screenshots, and canonical URL.
-- Consider moving secret delivery URLs under a noindex route policy if shared links may appear in public pages; keep only the homepage and documentation indexed.
+- Keep generated secret delivery URLs private and out of public pages; they are blocked by robots.txt and rendered with noindex metadata.
 
 ## Cloudflare setup
 
