@@ -74,6 +74,14 @@ function shell(language: LanguageCode, body: string, options: { turnstileSiteKey
   <meta name="twitter:image:alt" content="Secret Drop secure self-destructing password links">
   <meta name="theme-color" content="#7c5cff">
   <script type="application/ld+json">${structuredData()}</script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-0KQ7NV2F7M"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-0KQ7NV2F7M');
+  </script>
   <style>${styles()}</style>
   ${options.turnstileSiteKey ? `<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>` : ""}
 </head>

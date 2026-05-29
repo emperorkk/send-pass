@@ -128,6 +128,8 @@ test('create page includes indexable SEO and social metadata', () => {
   assert.match(html, /<meta property="og:image" content="\/social-card.svg">/);
   assert.match(html, /<link rel="manifest" href="\/site.webmanifest">/);
   assert.match(html, /<script type="application\/ld\+json">/);
+  assert.match(html, /https:\/\/www\.googletagmanager\.com\/gtag\/js\?id=G-0KQ7NV2F7M/);
+  assert.match(html, /gtag\('config', 'G-0KQ7NV2F7M'\)/);
   assert.doesNotMatch(html, /noindex/);
 });
 
