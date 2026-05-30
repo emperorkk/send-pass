@@ -7,7 +7,7 @@ function escapeHtml(value: string): string {
 }
 
 const SEO_TITLE = "Secret Drop — Secure self-destructing password links";
-const SEO_DESCRIPTION = "Secret Drop is a secure Cloudflare Worker app for sharing encrypted text and passwords with self-destructing links, expiration dates, retrieval limits, and multilingual delivery pages.";
+const SEO_DESCRIPTION = "Secret Drop securely shares encrypted text and passwords via self-destructing links with expirations, retrieval limits, and multilingual pages.";
 const SEO_KEYWORDS = "password sharing, secure secret sharing, self-destructing links, encrypted notes, one-time secret, Cloudflare Worker, password sender";
 
 function langOptions(selected: LanguageCode): string {
