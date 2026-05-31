@@ -1,0 +1,19 @@
+name = "secret-drop"
+main = "src/index.ts"
+compatibility_date = "2026-05-29"
+
+# Replace these IDs with your Cloudflare KV namespace IDs before deploying.
+# Create them with:
+#   wrangler kv namespace create SECRETS
+#   wrangler kv namespace create SECRETS --preview
+[[kv_namespaces]]
+binding = "SECRETS"
+id = "REPLACE_WITH_PRODUCTION_KV_NAMESPACE_ID"
+preview_id = "REPLACE_WITH_PREVIEW_KV_NAMESPACE_ID"
+
+[vars]
+# Optional. When set with TURNSTILE_SECRET_KEY, the create form requires Cloudflare Turnstile.
+TURNSTILE_SITE_KEY = ""
+
+[assets]
+directory = "./public"
