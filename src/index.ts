@@ -62,7 +62,7 @@ function sitemapXml(request: Request): Response {
 }
 
 function siteManifest(): Response {
-  return json({ name: "Secret Drop", short_name: "Secret Drop", description: "Secure self-destructing password links", start_url: "/", display: "standalone", background_color: "#0b1020", theme_color: "#7c5cff", categories: ["security", "productivity", "utilities"] });
+  return json({ name: "Secret Drop", short_name: "Secret Drop", description: "Secure self-destructing password links", start_url: "/", display: "standalone", background_color: "#0b1020", theme_color: "#7c5cff", categories: ["security", "productivity", "utilities"], icons: [{ src: "/favicon-512.png", sizes: "512x512", type: "image/png" }] });
 }
 
 function socialCard(): Response {
@@ -120,7 +120,7 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
   if (request.method === "GET" && url.pathname === "/robots.txt") return robotsTxt(request);
   if (request.method === "GET" && url.pathname === "/sitemap.xml") return sitemapXml(request);
   if (request.method === "GET" && url.pathname === "/site.webmanifest") return siteManifest();
-  if (request.method === "GET" && url.pathname === "/social-card.svg") return socialCard();
+  if (request.method === "GET" && url.pathname === "/social-card.svg") return Response.redirect(publicUrl(request, "/social-card-1200x630.png"), 301);
   if (request.method === "GET" && url.pathname === "/") return html(createPage(language, env.TURNSTILE_SITE_KEY));
   if (request.method === "POST" && url.pathname === "/api/secrets") return handleCreate(request, env);
 

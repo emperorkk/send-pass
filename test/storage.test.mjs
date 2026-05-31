@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
 import test from 'node:test';
 import { DEFAULT_DAYS, DEFAULT_RETRIEVALS, MAX_DAYS, MAX_RETRIEVALS, MAX_SECRET_CHARS, assertRequiredConfiguration, parsePositiveInteger, validateSecretInput, ValidationError } from '../dist/storage.js';
 import { dictionary, LANGUAGES, normalizeLanguage } from '../dist/i18n.js';
@@ -125,7 +126,9 @@ test('create page includes indexable SEO and social metadata', () => {
   assert.match(html, /<meta name="msvalidate\.01" content="094606C9E2B8B0AFD7ECF9EDD083FCE7">/);
   assert.match(html, /<meta property="og:title" content="Secret Drop/);
   assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
-  assert.match(html, /<meta property="og:image" content="\/social-card.svg">/);
+  assert.match(html, /<meta property="og:image" content="\/social-card-1200x630.png">/);
+  assert.match(html, /<meta name="twitter:image" content="\/social-card-1200x630.png">/);
+  assert.match(html, /<link rel="icon" type="image\/png" sizes="512x512" href="\/favicon-512.png">/);
   assert.match(html, /<link rel="manifest" href="\/site.webmanifest">/);
   assert.match(html, /<script type="application\/ld\+json">/);
   assert.match(html, /https:\/\/www\.googletagmanager\.com\/gtag\/js\?id=G-0KQ7NV2F7M/);
@@ -153,9 +156,9 @@ test('public discovery endpoints are available for crawlers and aggregators', as
   assert.equal(sitemap.status, 200);
   assert.match(await sitemap.text(), /<loc>https:\/\/example\.com\/<\/loc>/);
 
-  const card = await worker.fetch(new Request('https://example.com/social-card.svg'), {});
-  assert.equal(card.status, 200);
-  assert.match(await card.text(), /Secret Drop/);
+  const oldCard = await worker.fetch(new Request('https://example.com/social-card.svg'), {});
+  assert.equal(oldCard.status, 301);
+  assert.equal(oldCard.headers.get('location'), 'https://example.com/social-card-1200x630.png');
 });
 
 
@@ -180,4 +183,11 @@ test('secret and delete pages are noindex even though homepage is indexable', ()
   });
   assert.match(revealHtml, /<meta name="robots" content="noindex,nofollow,noarchive">/);
   assert.match(revealHtml, /<meta name="googlebot" content="noindex,nofollow,noarchive">/);
+});
+
+
+test('public media upload directory is present without committed binary placeholders', () => {
+  assert.ok(existsSync('public/README.md'), 'public/README.md keeps the upload directory present in GitHub');
+  assert.equal(existsSync('public/favicon-512.png'), false, 'favicon binary should be uploaded by the site owner');
+  assert.equal(existsSync('public/social-card-1200x630.png'), false, 'social card binary should be uploaded by the site owner');
 });

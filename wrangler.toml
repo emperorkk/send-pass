@@ -14,3 +14,6 @@ preview_id = "86ace31dd2e84d6a8d7ff4e19d77020f"
 [vars]
 # Optional. When set with TURNSTILE_SECRET_KEY, the create form requires Cloudflare Turnstile.
 TURNSTILE_SITE_KEY = "0x4AAAAAADYoL2EdBTDCaMi8"
+
+[assets]
+directory = "./public"

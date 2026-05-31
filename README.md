@@ -16,6 +16,15 @@ Secret Drop is a polished Cloudflare Worker web app for sharing sensitive text w
 - Optional Cloudflare Turnstile verification when `TURNSTILE_SECRET_KEY` is configured.
 - Security headers plus indexable SEO, Open Graph, Twitter Card, and JSON-LD metadata.
 
+## Media assets
+
+Upload the public media files at these exact repository paths:
+
+- `public/favicon-512.png` for `/favicon-512.png` — 512×512 PNG favicon/app icon.
+- `public/social-card-1200x630.png` for `/social-card-1200x630.png` — 1200×630 PNG link preview image used by Open Graph and Twitter/X cards.
+
+The actual image binaries are intentionally not committed in this branch. The `public/` directory exists in GitHub because of `public/README.md`; upload your two PNG files into that directory and keep these filenames unchanged. The Worker static assets configuration uploads the `public/` directory.
+
 ## Public search and directory launch checklist
 
 To make a deployment discoverable by Google, social preview cards, and software/tool aggregators:

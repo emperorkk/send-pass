@@ -7,7 +7,7 @@ function escapeHtml(value: string): string {
 }
 
 const SEO_TITLE = "Secret Drop — Secure self-destructing password links";
-const SEO_DESCRIPTION = "Secret Drop securely shares encrypted text and passwords via self-destructing links with expirations, retrieval limits, and multilingual pages.";
+const SEO_DESCRIPTION = "Secret Drop is a secure Cloudflare Worker app for sharing encrypted text and passwords with self-destructing links, expiration dates, retrieval limits, and multilingual delivery pages.";
 const SEO_KEYWORDS = "password sharing, secure secret sharing, self-destructing links, encrypted notes, one-time secret, Cloudflare Worker, password sender";
 
 function langOptions(selected: LanguageCode): string {
@@ -55,6 +55,8 @@ function shell(language: LanguageCode, body: string, options: { turnstileSiteKey
   <meta name="robots" content="${robots}">
   <meta name="googlebot" content="${robots}">
   <link rel="canonical" href="/">
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
+  <link rel="apple-touch-icon" href="/favicon-512.png">
   <link rel="manifest" href="/site.webmanifest">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Secret Drop">
@@ -62,15 +64,15 @@ function shell(language: LanguageCode, body: string, options: { turnstileSiteKey
   <meta property="og:description" content="${escapeHtml(SEO_DESCRIPTION)}">
   <meta property="og:url" content="/">
   <meta property="og:locale" content="${language}">
-  <meta property="og:image" content="/social-card.svg">
-  <meta property="og:image:type" content="image/svg+xml">
+  <meta property="og:image" content="/social-card-1200x630.png">
+  <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Secret Drop secure self-destructing password links">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escapeHtml(SEO_TITLE)}">
   <meta name="twitter:description" content="${escapeHtml(SEO_DESCRIPTION)}">
-  <meta name="twitter:image" content="/social-card.svg">
+  <meta name="twitter:image" content="/social-card-1200x630.png">
   <meta name="twitter:image:alt" content="Secret Drop secure self-destructing password links">
   <meta name="theme-color" content="#7c5cff">
   <script type="application/ld+json">${structuredData()}</script>
